@@ -37,8 +37,11 @@ class StyleEditorView extends EventEmitter {
     this.$fontSizeEdit = null;
     this.$fontSizeSelect = null;
     this.$fillColor = null;
+    this.$fillColorIcon = null;
     this.$lineColor = null;
+    this.$lineColorIcon = null;
     this.$fontColor = null;
+    this.$fontColorIcon = null;
     this.$lineStyleRadio = null;
     this.$inheritStyleCheckbox = null;
 
@@ -101,8 +104,11 @@ class StyleEditorView extends EventEmitter {
     this.$fontSizeEdit = this.$view.find(".font-size input");
     this.$fontSizeSelect = this.$view.find(".font-size select");
     this.$fillColor = this.$view.find(".fill-color");
+    this.$fillColorIcon = this.$view.find(".staruml-icon.icon-tool-fill-color");
     this.$lineColor = this.$view.find(".line-color");
+    this.$lineColorIcon = this.$view.find(".staruml-icon.icon-tool-line-color");
     this.$fontColor = this.$view.find(".font-color");
+    this.$fontColorIcon = this.$view.find(".staruml-icon.icon-tool-font-color");
     this.$lineStyleRadio = $("input[name='line-style']", this.$view);
     this.$inheritStyleCheckbox = $("input.inherit-style", this.$view);
 
@@ -254,7 +260,7 @@ class StyleEditorView extends EventEmitter {
       });
     });
 
-    // Fill Color
+    // Font Color
     self.$fontColor.click(function (e) {
       e.preventDefault();
       const c = self._getFontColor();
@@ -279,6 +285,7 @@ class StyleEditorView extends EventEmitter {
         "parentStyle",
         self.$inheritStyleCheckbox.is(":checked"),
       );
+      self._updateStyles(self._views);
     });
 
     // Line Style
@@ -730,6 +737,31 @@ class StyleEditorView extends EventEmitter {
       } else {
         this.$textAlignWrapper.hide();
       }
+
+      this.$fontFaceEdit.prop("disabled", inheritStyle);
+      this.$fontFaceEdit.css("cursor", inheritStyle ? "not-allowed" : "auto");
+      this.$fontFaceSelect.prop("disabled", inheritStyle);
+      this.$fontFaceSelect.css("cursor", inheritStyle ? "not-allowed" : "auto");
+      this.$fontSizeEdit.prop("disabled", inheritStyle);
+      this.$fontSizeEdit.css("cursor", inheritStyle ? "not-allowed" : "auto");
+      this.$fontSizeSelect.prop("disabled", inheritStyle);
+      this.$fontSizeSelect.css("cursor", inheritStyle ? "not-allowed" : "auto");
+
+      this.$fillColor.css("pointer-events", inheritStyle ? "none" : "auto");
+      this.$fillColor
+        .parent()
+        .css("cursor", inheritStyle ? "not-allowed" : "auto");
+      this.$fillColorIcon.css("opacity", inheritStyle ? 0.3 : 1);
+      this.$lineColor.css("pointer-events", inheritStyle ? "none" : "auto");
+      this.$lineColor
+        .parent()
+        .css("cursor", inheritStyle ? "not-allowed" : "auto");
+      this.$lineColorIcon.css("opacity", inheritStyle ? 0.3 : 1);
+      this.$fontColor.css("pointer-events", inheritStyle ? "none" : "auto");
+      this.$fontColor
+        .parent()
+        .css("cursor", inheritStyle ? "not-allowed" : "auto");
+      this.$fontColorIcon.css("opacity", inheritStyle ? 0.3 : 1);
     } else {
       this.$view.hide();
     }

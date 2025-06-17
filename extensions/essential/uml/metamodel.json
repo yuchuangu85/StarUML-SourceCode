@@ -3247,6 +3247,18 @@
         "kind": "prim",
         "type": "Boolean",
         "default": false
+      },
+      {
+        "name": "showNamespace",
+        "kind": "prim",
+        "type": "Boolean",
+        "default": false
+      },
+      {
+        "name": "showDiagramName",
+        "kind": "prim",
+        "type": "Boolean",
+        "default": false
       }
     ]
   },

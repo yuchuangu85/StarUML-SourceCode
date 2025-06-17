@@ -9343,7 +9343,7 @@ div.k-notification.k-notification-error {
   background: transparent;
   border: 0;
 }
-.element-list-picker .dialog-body .listview-wrapper .listview > div {
+.element-list-picker .dialog-body .listview-wrapper .listview > li {
   padding-left: 1.3em !important;
   padding-right: 1.3em !important;
   overflow: hidden;
@@ -9461,6 +9461,10 @@ div.k-notification.k-notification-error {
   height: 100%;
   overflow: auto;
 }
+.icon-picker .dialog-body .listview-wrapper .listview {
+  padding: 0;
+  margin: 0;
+}
 .icon-picker .dialog-body .listview-wrapper .listview .list-item {
   padding-top: 0.2rem;
   padding-bottom: 0.2rem;
@@ -9474,6 +9478,10 @@ div.k-notification.k-notification-error {
 .icon-picker .dialog-body .listview-wrapper .listview .list-item img {
   width: 24px;
   height: 24px;
+}
+.icon-picker .dialog-body .listview-wrapper .listview .list-item.selected {
+  background-color: #404244;
+  color: #1c7aed;
 }
 .preference-dialog .dialog-body {
   position: relative;

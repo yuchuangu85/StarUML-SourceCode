@@ -1308,6 +1308,9 @@ class Hyperlink extends Model {
 
     /** @member {*} */
     this.url = "";
+
+    /** @member {boolean} */
+    this.showName = false;
   }
 
   getNodeText(options) {

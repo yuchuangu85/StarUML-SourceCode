@@ -29,24 +29,22 @@ const dialogTemplate = fs.readFileSync(
  */
 class IconPickerDialog {
   constructor() {
-    /**
-     * DataSource for ListView
-     * @private
-     * @type {kendo.data.DataSource}
-     */
-    this.dataSource = new kendo.data.DataSource();
-
     this.autoComplete = null;
-
     this.selected = null;
+    this.allItems = [];
+    this.filteredItems = [];
+    this.displayedItems = [];
+    this.itemsPerPage = 50;
+    this.currentPage = 0;
+    this.isLoading = false;
   }
 
   /**
-   * Convert Core.Model to DataSource Item
+   * Convert file to item object
    * @private
    * @param {string} basePath
-   * @param {string[]} files
-   * @type {kendo.data.DataSource}
+   * @param {string} file
+   * @return {Object}
    */
   _toDataItem(basePath, file) {
     return {
@@ -59,18 +57,66 @@ class IconPickerDialog {
     };
   }
 
-  updateDataSource(basePath, files, filter = "") {
-    this.dataSource.data([]);
-    for (let i = 0, len = files.length; i < len; i++) {
-      const item = files[i];
-      if (filter.trim().length > 0) {
-        if (item.toLowerCase().indexOf(filter.toLowerCase()) > -1) {
-          this.dataSource.add(this._toDataItem(basePath, item));
-        }
-      } else {
-        this.dataSource.add(this._toDataItem(basePath, item));
-      }
+  /**
+   * Initialize all items
+   * @param {string} basePath
+   * @param {string[]} files
+   */
+  initializeAllItems(basePath, files) {
+    this.allItems = files.map((file) => this._toDataItem(basePath, file));
+  }
+
+  /**
+   * Filter items based on search term
+   * @param {string} filter
+   */
+  filterItems(filter = "") {
+    if (filter.trim().length > 0) {
+      this.filteredItems = this.allItems.filter(
+        (item) =>
+          item.text.toLowerCase().includes(filter.toLowerCase()) ||
+          item.id.toLowerCase().includes(filter.toLowerCase()),
+      );
+    } else {
+      this.filteredItems = [...this.allItems];
     }
+    this.currentPage = 0;
+    this.displayedItems = [];
+  }
+
+  /**
+   * Load next page of items
+   * @return {Object[]} items for the next page
+   */
+  loadNextPage() {
+    const startIndex = this.currentPage * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    const nextPageItems = this.filteredItems.slice(startIndex, endIndex);
+
+    this.displayedItems.push(...nextPageItems);
+    this.currentPage++;
+
+    return nextPageItems;
+  }
+
+  /**
+   * Check if there are more items to load
+   * @return {boolean}
+   */
+  hasMoreItems() {
+    return this.currentPage * this.itemsPerPage < this.filteredItems.length;
+  }
+
+  /**
+   * Render list item HTML
+   * @param {Object} item
+   * @return {string}
+   */
+  renderListItem(item) {
+    return `<li class="list-item" data-id="${item.id}">
+      <img src="${item.icon}" loading="lazy" alt="${item.text}">
+      <div class="item-text">${item.text}</div>
+    </li>`;
   }
 
   /**
@@ -93,39 +139,117 @@ class IconPickerDialog {
 
     var $dlg = dialog.getElement();
     var $wrapper = $dlg.find(".listview-wrapper");
+    var $listview = $dlg.find(".listview");
     ViewUtils.addScrollerShadow($wrapper, null, true);
 
     // icon files
-    const basePath = path.join(__dirname, `../../resources/assets/`, baseDir);
+    const basePath = path.join(__dirname, "../../resources/assets/", baseDir);
     const files = fs.readdirSync(basePath);
+
+    // Initialize data
+    this.initializeAllItems(basePath, files);
+    this.filterItems("");
 
     // setup search
     const $input = $dlg.find(".icon-search-input");
     $input.keyup((e) => {
       const val = e.target.value;
-      this.updateDataSource(basePath, files, val);
+      this.handleSearch(val, $listview);
+    });
+    $input.focus();
+
+    // Setup infinite scroll
+    this.setupInfiniteScroll($listview, $wrapper);
+
+    // Load initial items
+    this.loadMoreItems($listview);
+
+    // Handle item selection
+    $listview.on("click", ".list-item", (e) => {
+      const $item = $(e.currentTarget);
+      const itemId = $item.data("id");
+
+      // Remove previous selection
+      $listview.find(".list-item").removeClass("selected");
+
+      // Add selection to clicked item
+      $item.addClass("selected");
+
+      // Store selected value
+      this.selected = itemId;
     });
 
-    // setup listView
-    var $listview = $dlg.find(".listview");
-    var self = this;
-    this.selectedElement = null;
-    this.updateDataSource(basePath, files);
-    $listview.kendoListView({
-      dataSource: this.dataSource,
-      template:
-        "<div class='list-item'><img src='#=icon#' loading='lazy'><div>#:text#</div></div>",
-      selectable: true,
-      // eslint-disable-next-line object-shorthand, no-unused-vars
-      change: function (e) {
-        var selected = this.select();
-        if (selected && selected.length > 0) {
-          var dataItem = self.dataSource.getByUid(selected[0].dataset.uid);
-          self.selected = dataItem.id;
-        }
-      },
+    // Handle double click to select and close dialog
+    $listview.on("dblclick", ".list-item", (e) => {
+      const $item = $(e.currentTarget);
+      const itemId = $item.data("id");
+
+      // Set selected value
+      this.selected = itemId;
+      // $dlg.data("returnValue", this.selected);
+
+      // Close dialog with OK result
+      dialog.close("ok");
     });
+
     return dialog;
+  }
+
+  /**
+   * Handle search functionality
+   * @param {string} filter
+   * @param {jQuery} $listview
+   */
+  handleSearch(filter, $listview) {
+    this.filterItems(filter);
+    $listview.empty();
+    this.loadMoreItems($listview);
+  }
+
+  /**
+   * Setup infinite scroll functionality
+   * @param {jQuery} $listview
+   * @param {jQuery} $wrapper
+   */
+  setupInfiniteScroll($listview, $wrapper) {
+    const self = this;
+
+    $wrapper.on("scroll", function () {
+      const scrollTop = $(this).scrollTop();
+      const scrollHeight = $(this)[0].scrollHeight;
+      const height = $(this).height();
+
+      // Load more items when near bottom (within 100px)
+      if (scrollTop + height >= scrollHeight - 100) {
+        if (!self.isLoading && self.hasMoreItems()) {
+          self.loadMoreItems($listview);
+        }
+      }
+    });
+  }
+
+  /**
+   * Load more items into the listview
+   * @param {jQuery} $listview
+   */
+  loadMoreItems($listview) {
+    if (this.isLoading) return;
+
+    this.isLoading = true;
+
+    // Simulate loading delay for better UX
+    setTimeout(() => {
+      const nextPageItems = this.loadNextPage();
+
+      if (nextPageItems.length > 0) {
+        const itemsHtml = nextPageItems
+          .map((item) => this.renderListItem(item))
+          .join("");
+        $listview.append(itemsHtml);
+      }
+
+      this.isLoading = false;
+    }, 50);
   }
 }
 

@@ -47,8 +47,8 @@
       "description": "Default font size of view elements.",
       "type": "combo",
       "options": [
-        { "value": 8,  "text": "8"  },
-        { "value": 9,  "text": "9"  },
+        { "value": 8, "text": "8" },
+        { "value": 9, "text": "9" },
         { "value": 10, "text": "10" },
         { "value": 11, "text": "11" },
         { "value": 12, "text": "12" },
@@ -119,10 +119,10 @@
       "description": "Default size (width and height) of grid.",
       "type": "combo",
       "options": [
-        { "value": 2,  "text": "2"  },
-        { "value": 4,  "text": "4"  },
-        { "value": 6,  "text": "6" },
-        { "value": 8,  "text": "8" },
+        { "value": 2, "text": "2" },
+        { "value": 4, "text": "4" },
+        { "value": 6, "text": "6" },
+        { "value": 8, "text": "8" },
         { "value": 10, "text": "10" },
         { "value": 12, "text": "12" },
         { "value": 14, "text": "14" },
@@ -137,6 +137,12 @@
       "description": "Background color of diagram editor.",
       "type": "color",
       "default": "#ffffff"
+    },
+    "diagramEditor.gridColor": {
+      "text": "Grid Color",
+      "description": "Grid color of diagram editor.",
+      "type": "color",
+      "default": "#e0e0e0"
     },
     "validation": {
       "text": "Validation",

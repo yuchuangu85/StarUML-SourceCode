@@ -111,7 +111,7 @@ class DiagramManager extends EventEmitter {
         if (this._workingDiagrams.indexOf(diagram) > -1) {
           this._workingDiagrams.splice(
             this._workingDiagrams.indexOf(diagram),
-            1
+            1,
           );
         }
         /**
@@ -286,7 +286,7 @@ class DiagramManager extends EventEmitter {
       this.setCurrentDiagram(this._workingDiagrams[index - 1]);
     } else if (index === 0 && this._workingDiagrams.length > 0) {
       this.setCurrentDiagram(
-        this._workingDiagrams[this._workingDiagrams.length - 1]
+        this._workingDiagrams[this._workingDiagrams.length - 1],
       );
     }
   }
@@ -497,7 +497,7 @@ class DiagramManager extends EventEmitter {
   getScrollPosition() {
     return new Point(
       this.$diagramArea.scrollLeft(),
-      this.$diagramArea.scrollTop()
+      this.$diagramArea.scrollTop(),
     );
   }
 
@@ -674,7 +674,7 @@ class DiagramManager extends EventEmitter {
       "containerViewChanged",
       (views, dx, dy, containerView) => {
         this.emit("containerViewChanged", views, dx, dy, containerView);
-      }
+      },
     );
     this.diagramEditor.on("nodeResized", (node, left, top, right, bottom) => {
       this.emit("nodeResized", node, left, top, right, bottom);
@@ -686,7 +686,7 @@ class DiagramManager extends EventEmitter {
       "edgeReconnected",
       (edge, points, newParticipant, isTailSide) => {
         this.emit("edgeReconnected", edge, points, newParticipant, isTailSide);
-      }
+      },
     );
     this.diagramEditor.on("zoom", (scale) => {
       this.emit("zoom", scale);
@@ -727,7 +727,7 @@ class DiagramManager extends EventEmitter {
           if (this.diagramEditor && this.diagramEditor.diagram) {
             var idx = _.indexOf(
               this.diagramEditor.diagram.ownedViews,
-              this.diagramEditor.diagram.selectedViews[0]
+              this.diagramEditor.diagram.selectedViews[0],
             );
             if (
               idx > -1 &&
@@ -753,71 +753,63 @@ class DiagramManager extends EventEmitter {
           e.preventDefault();
           break;
         case keycode("up"):
-          if (e.ctrlKey || e.metaKey) {
-            if (
-              this.diagramEditor &&
-              this.diagramEditor.diagram &&
-              this.diagramEditor.diagram.selectedViews.length > 0
-            ) {
-              dy = this.diagramEditor.canvas.gridFactor.height;
-              this._triggerViewMovedEvent(
-                this.diagramEditor.diagram.selectedViews,
-                0,
-                e.altKey ? -1 : -dy
-              );
-              e.preventDefault();
-            }
+          if (
+            this.diagramEditor &&
+            this.diagramEditor.diagram &&
+            this.diagramEditor.diagram.selectedViews.length > 0
+          ) {
+            dy = this.diagramEditor.canvas.gridFactor.height;
+            this._triggerViewMovedEvent(
+              this.diagramEditor.diagram.selectedViews,
+              0,
+              e.shiftKey ? -dy : -1,
+            );
+            e.preventDefault();
           }
           break;
         case keycode("down"):
-          if (e.ctrlKey || e.metaKey) {
-            if (
-              this.diagramEditor &&
-              this.diagramEditor.diagram &&
-              this.diagramEditor.diagram.selectedViews.length > 0
-            ) {
-              dy = this.diagramEditor.canvas.gridFactor.height;
-              this._triggerViewMovedEvent(
-                this.diagramEditor.diagram.selectedViews,
-                0,
-                e.altKey ? 1 : dy
-              );
-              e.preventDefault();
-            }
+          if (
+            this.diagramEditor &&
+            this.diagramEditor.diagram &&
+            this.diagramEditor.diagram.selectedViews.length > 0
+          ) {
+            dy = this.diagramEditor.canvas.gridFactor.height;
+            this._triggerViewMovedEvent(
+              this.diagramEditor.diagram.selectedViews,
+              0,
+              e.shiftKey ? dy : 1,
+            );
+            e.preventDefault();
           }
           break;
         case keycode("left"):
-          if (e.ctrlKey || e.metaKey) {
-            if (
-              this.diagramEditor &&
-              this.diagramEditor.diagram &&
-              this.diagramEditor.diagram.selectedViews.length > 0
-            ) {
-              dx = this.diagramEditor.canvas.gridFactor.width;
-              this._triggerViewMovedEvent(
-                this.diagramEditor.diagram.selectedViews,
-                e.altKey ? -1 : -dx,
-                0
-              );
-              e.preventDefault();
-            }
+          if (
+            this.diagramEditor &&
+            this.diagramEditor.diagram &&
+            this.diagramEditor.diagram.selectedViews.length > 0
+          ) {
+            dx = this.diagramEditor.canvas.gridFactor.width;
+            this._triggerViewMovedEvent(
+              this.diagramEditor.diagram.selectedViews,
+              e.shiftKey ? -dx : -1,
+              0,
+            );
+            e.preventDefault();
           }
           break;
         case keycode("right"):
-          if (e.ctrlKey || e.metaKey) {
-            if (
-              this.diagramEditor &&
-              this.diagramEditor.diagram &&
-              this.diagramEditor.diagram.selectedViews.length > 0
-            ) {
-              dx = this.diagramEditor.canvas.gridFactor.width;
-              this._triggerViewMovedEvent(
-                this.diagramEditor.diagram.selectedViews,
-                e.altKey ? 1 : dx,
-                0
-              );
-              e.preventDefault();
-            }
+          if (
+            this.diagramEditor &&
+            this.diagramEditor.diagram &&
+            this.diagramEditor.diagram.selectedViews.length > 0
+          ) {
+            dx = this.diagramEditor.canvas.gridFactor.width;
+            this._triggerViewMovedEvent(
+              this.diagramEditor.diagram.selectedViews,
+              e.shiftKey ? dx : 1,
+              0,
+            );
+            e.preventDefault();
           }
           break;
       }
@@ -853,7 +845,7 @@ class DiagramManager extends EventEmitter {
 
     // read snapToGrid
     this.diagramEditor.snapToGrid = app.preferences.get(
-      "diagramEditor.snapToGrid"
+      "diagramEditor.snapToGrid",
     );
   }
 

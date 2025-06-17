@@ -71,7 +71,7 @@ const DEFAULT_FILE_FILTERS = [{ name: "All Files", extensions: ["*"] }];
  */
 function _dismissDialog($dlg, buttonId) {
   $dlg.data("buttonId", buttonId);
-  $dlg.data("kendoWindow").close();
+  if ($dlg.data("kendoWindow")) $dlg.data("kendoWindow").close();
 }
 
 /**
@@ -213,9 +213,10 @@ Dialog.prototype.getPromise = function () {
 
 /**
  * Closes the dialog if is visible
+ * @param {string} buttonId The button ID to use when closing (defaults to cancel)
  */
-Dialog.prototype.close = function () {
-  _dismissDialog(this._$dlg, DIALOG_BTN_CANCEL);
+Dialog.prototype.close = function (buttonId) {
+  _dismissDialog(this._$dlg, buttonId || DIALOG_BTN_CANCEL);
 };
 
 /**

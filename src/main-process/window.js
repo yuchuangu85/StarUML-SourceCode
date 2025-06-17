@@ -13,7 +13,7 @@
  */
 
 const URL = require("url");
-const { BrowserWindow, dialog } = require("electron");
+const { BrowserWindow, dialog, screen } = require("electron");
 const { EventEmitter } = require("events");
 const Touchbar = require("./touchbar");
 const appConfig = require("electron-settings");
@@ -79,17 +79,29 @@ class Window extends EventEmitter {
   constructor(options) {
     super();
     const mainWindowStateKeeper = windowStateKeeper("main");
-
+    let x = mainWindowStateKeeper.x;
+    let y = mainWindowStateKeeper.y;
+    let w = mainWindowStateKeeper.width;
+    let h = mainWindowStateKeeper.height;
+    const currentScreenSize = screen.getPrimaryDisplay().workAreaSize;
+    const sw = currentScreenSize.width;
+    const sh = currentScreenSize.height;
+    if (w > sw) w = sw;
+    if (h > sh) h = sh;
+    if (x + w > sw) x = sw - w;
+    if (y + h > sh) y = sh - h;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
     options = options || {};
     let browserOptions = {
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
       },
-      x: mainWindowStateKeeper.x,
-      y: mainWindowStateKeeper.y,
-      width: mainWindowStateKeeper.width,
-      height: mainWindowStateKeeper.height,
+      x: x,
+      y: y,
+      width: w,
+      height: h,
     };
 
     // browserOptions.width = options.width || 1200

@@ -41,6 +41,8 @@ function _addFrame(diagram) {
   diagram.ownedViews.push(frame);
   frame._parent = diagram;
   frame.model = diagram;
+  frame.showType = true;
+  frame.showDiagramName = true;
   frame.initialize(null, 8, 8, 700, 600);
 }
 

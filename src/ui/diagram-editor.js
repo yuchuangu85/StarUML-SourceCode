@@ -2494,7 +2494,9 @@ class DiagramEditor extends EventEmitter {
   }
 
   drawBackground(g) {
-    g.fillStyle = app.preferences.get("diagramEditor.backgroundColor");
+    const bgColor = app.preferences.get("diagramEditor.backgroundColor");
+    const gridColor = app.preferences.get("diagramEditor.gridColor");
+    g.fillStyle = bgColor;
     g.fillRect(0, 0, this.canvasElement.width, this.canvasElement.height);
     if (this.showGrid) {
       const sz = this.getSize();
@@ -2517,7 +2519,7 @@ class DiagramEditor extends EventEmitter {
       const wc = Math.floor((p2.x - p1.x) / w);
       const wh = Math.floor((p2.y - p1.y) / h);
       this.canvas.storeState();
-      this.canvas.color = "#E0E0E0";
+      this.canvas.color = gridColor;
       this.canvas.lineWidth = 1 / this.canvas.ratio;
       this.canvas.alpha = 1.0;
       for (let i = 0; i <= wc; i++) {

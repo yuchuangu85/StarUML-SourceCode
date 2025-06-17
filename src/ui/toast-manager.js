@@ -12,18 +12,20 @@
  *
  */
 
-const fs = require('fs')
-const path = require('path')
+const fs = require("fs");
+const path = require("path");
 
-const toastTemplate = fs.readFileSync(path.join(__dirname, '../static/html-contents/toast-template.html'), 'utf8')
+const toastTemplate = fs.readFileSync(
+  path.join(__dirname, "../static/html-contents/toast-template.html"),
+  "utf8",
+);
 
 /**
  * ToastManager
  */
 class ToastManager {
-
-  constructor () {
-    this.toast = null
+  constructor() {
+    this.toast = null;
   }
 
   /**
@@ -31,8 +33,8 @@ class ToastManager {
    *
    * @param {string} message
    */
-  info (message) {
-    this.toast.show({message: message}, 'info')
+  info(message) {
+    this.toast.show({ message: message }, "info");
   }
 
   /**
@@ -40,8 +42,8 @@ class ToastManager {
    *
    * @param {string} message
    */
-  warning (message) {
-    this.toast.show({message: message}, 'warning')
+  warning(message) {
+    this.toast.show({ message: message }, "warning");
   }
 
   /**
@@ -49,23 +51,25 @@ class ToastManager {
    *
    * @param {string} message
    */
-  error (message) {
-    this.toast.show({message: message}, 'error')
+  error(message) {
+    this.toast.show({ message: message }, "error");
   }
 
-  htmlReady () {
-    this.toast = $('#toast').kendoNotification({
-      position: { pinned: true },
-      appendTo: '#toast-holder',
-      autoHideAfter: 5000,
-      stacking: 'up',
-      templates: [
-        { type: 'info', template: toastTemplate },
-        { type: 'warning', template: toastTemplate },
-        { type: 'error', template: toastTemplate }
-      ]
-    }).data('kendoNotification')
+  htmlReady() {
+    this.toast = $("#toast")
+      .kendoNotification({
+        position: { pinned: true },
+        appendTo: "#toast-holder",
+        autoHideAfter: 5000,
+        stacking: "up",
+        templates: [
+          { type: "info", template: toastTemplate },
+          { type: "warning", template: toastTemplate },
+          { type: "error", template: toastTemplate },
+        ],
+      })
+      .data("kendoNotification");
   }
 }
 
-module.exports = ToastManager
+module.exports = ToastManager;

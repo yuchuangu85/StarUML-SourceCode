@@ -73,6 +73,13 @@
         "type": "String",
         "visible": true,
         "default": ""
+      },
+      {
+        "name": "showName",
+        "kind": "prim",
+        "type": "Boolean",
+        "visible": true,
+        "default": false
       }
     ],
     "view": "HyperlinkView"

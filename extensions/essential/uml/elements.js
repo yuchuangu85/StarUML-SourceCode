@@ -12234,69 +12234,118 @@ class UMLFrameView extends UMLCustomFrameView {
 
     /** @member {boolean} */
     this.showType = false;
+
+    /** @member {boolean} */
+    this.showNamespace = false;
+
+    /** @member {boolean} */
+    this.showDiagramName = false;
+  }
+
+  getDiagramTypeName(diagramOrElement) {
+    if (
+      diagramOrElement instanceof type.UMLClass ||
+      diagramOrElement instanceof type.UMLClassDiagram
+    ) {
+      return "class";
+    } else if (
+      diagramOrElement instanceof type.UMLComponent ||
+      diagramOrElement instanceof type.UMLComponentDiagram
+    ) {
+      return "cmp";
+    } else if (diagramOrElement instanceof type.UMLDeploymentDiagram) {
+      return "dep";
+    } else if (
+      diagramOrElement instanceof type.UMLInteraction ||
+      diagramOrElement instanceof type.UMLSequenceDiagram ||
+      diagramOrElement instanceof type.UMLCommunicationDiagram ||
+      diagramOrElement instanceof type.UMLTimingDiagram ||
+      diagramOrElement instanceof type.UMLInteractionOverviewDiagram
+    ) {
+      return "sd";
+    } else if (
+      diagramOrElement instanceof type.UMLStateMachine ||
+      diagramOrElement instanceof type.UMLStatechartDiagram
+    ) {
+      return "stm";
+    } else if (
+      diagramOrElement instanceof type.UMLActivity ||
+      diagramOrElement instanceof type.UMLActivityDiagram
+    ) {
+      return "act";
+    } else if (
+      diagramOrElement instanceof type.UMLUseCase ||
+      diagramOrElement instanceof type.UMLUseCaseDiagram
+    ) {
+      return "uc";
+    } else if (
+      diagramOrElement instanceof type.UMLPackage ||
+      diagramOrElement instanceof type.UMLPackageDiagram
+    ) {
+      return "pkg";
+    } else if (diagramOrElement instanceof type.SysMLRequirementDiagram) {
+      return "req";
+    } else if (diagramOrElement instanceof type.SysMLBlockDefinitionDiagram) {
+      return "bdd";
+    } else if (diagramOrElement instanceof type.SysMLParametricDiagram) {
+      return "par";
+    } else if (diagramOrElement instanceof type.SysMLInternalBlockDiagram) {
+      return "ibd";
+    }
+    return "";
+  }
+
+  getTarget(elem) {
+    let target = elem;
+    if (
+      elem instanceof type.Diagram &&
+      elem._parent instanceof type.ExtensibleModel
+    ) {
+      target = elem._parent;
+    }
+    return target;
   }
 
   update(canvas) {
     super.update(canvas);
     if (this.model) {
-      // frame kind
-      if (
-        this.model instanceof type.UMLClass ||
-        this.model instanceof type.UMLClassDiagram
-      ) {
-        this.frameTypeLabel.text = "class";
-      } else if (
-        this.model instanceof type.UMLComponent ||
-        this.model instanceof type.UMLComponentDiagram
-      ) {
-        this.frameTypeLabel.text = "cmp";
-      } else if (this.model instanceof type.UMLDeploymentDiagram) {
-        this.frameTypeLabel.text = "dep";
-      } else if (
-        this.model instanceof type.UMLInteraction ||
-        this.model instanceof type.UMLSequenceDiagram ||
-        this.model instanceof type.UMLCommunicationDiagram ||
-        this.model instanceof type.UMLTimingDiagram ||
-        this.model instanceof type.UMLInteractionOverviewDiagram
-      ) {
-        this.frameTypeLabel.text = "sd";
-      } else if (
-        this.model instanceof type.UMLStateMachine ||
-        this.model instanceof type.UMLStatechartDiagram
-      ) {
-        this.frameTypeLabel.text = "stm";
-      } else if (
-        this.model instanceof type.UMLActivity ||
-        this.model instanceof type.UMLActivityDiagram
-      ) {
-        this.frameTypeLabel.text = "act";
-      } else if (
-        this.model instanceof type.UMLUseCase ||
-        this.model instanceof type.UMLUseCaseDiagram
-      ) {
-        this.frameTypeLabel.text = "uc";
-      } else if (
-        this.model instanceof type.UMLPackage ||
-        this.model instanceof type.UMLPackageDiagram
-      ) {
-        this.frameTypeLabel.text = "pkg";
-      } else if (this.model instanceof type.SysMLRequirementDiagram) {
-        this.frameTypeLabel.text = "req";
-      } else if (this.model instanceof type.SysMLBlockDefinitionDiagram) {
-        this.frameTypeLabel.text = "bdd";
-      } else if (this.model instanceof type.SysMLParametricDiagram) {
-        this.frameTypeLabel.text = "par";
-      } else if (this.model instanceof type.SysMLInternalBlockDiagram) {
-        this.frameTypeLabel.text = "ibd";
+      // show diagram type
+      let diagramTypeName = this.getDiagramTypeName(this.model);
+      if (diagramTypeName.length === 0) {
+        diagramTypeName = this.getDiagramTypeName(this.getDiagram());
       }
-      // name
-      if (this.model.name.length > 0) {
-        let text = "";
-        if (this.showType) {
-          text += `[${this.model.getDisplayClassName()}] `;
+      this.frameTypeLabel.text = diagramTypeName;
+
+      let diagram = this.getDiagram();
+      let reference = this.model;
+      let target = this.getTarget(reference);
+      let textTokens = [];
+
+      // show model element type name
+      if (this.showType) {
+        textTokens.push(`[${target.getDisplayClassName()}]`);
+      }
+
+      // show model element name
+      if (target) {
+        if (
+          this.showNamespace &&
+          target._parent instanceof type.ExtensibleModel
+        ) {
+          textTokens.push(`${target._parent.name}::${target.name}`);
+        } else {
+          textTokens.push(target.name);
         }
-        text += this.model.name;
-        this.nameLabel.text = text; // this.model.name;
+      }
+
+      // show diagram name
+      if (this.showDiagramName) {
+        textTokens.push(`[${diagram.name}]`);
+      }
+
+      // set name label text
+      if (textTokens.length > 0) {
+        this.nameLabel.text = textTokens.join(" ");
       }
     }
   }
@@ -14040,10 +14089,15 @@ class HyperlinkView extends NodeView {
     super.update(canvas);
     this.typeLabel.font.style = Font.FS_BOLD;
     this.typeLabel.text = "link";
-    if (this.model && this.model.reference instanceof type.Model) {
-      this.nameLabel.text = this.model.reference.name;
+    this.nameLabel.autoResize = true;
+    if (this.model.showName) {
+      this.nameLabel.text = this.model.name;
     } else {
-      this.nameLabel.text = this.model.url;
+      if (this.model && this.model.reference instanceof type.Model) {
+        this.nameLabel.text = this.model.reference.name;
+      } else {
+        this.nameLabel.text = this.model.url;
+      }
     }
   }
 }

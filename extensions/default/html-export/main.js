@@ -223,22 +223,26 @@ function exportToHTML(targetDir, exportDiagram) {
 }
 
 async function handleExportHTML(path) {
-  // If path is not assigned, popup Open Dialog to select a folder
-  if (!path) {
-    var files = await app.dialogs.showOpenDialog(
-      "Select a folder where HTML docs to be exported",
-      null,
-      null,
-      { properties: ["openDirectory"] },
-    );
+  try {
+    // If path is not assigned, popup Open Dialog to select a folder
+    if (!path) {
+      var files = await app.dialogs.showOpenDialog(
+        "Select a folder where HTML docs to be exported",
+        null,
+        null,
+        { properties: ["openDirectory"] },
+      );
 
-    console.log("files", files);
-
-    if (files && files.length > 0) {
-      exportToHTML(files[0] + DOC_FOLDER, true);
+      if (files && files.length > 0) {
+        exportToHTML(files[0] + DOC_FOLDER, true);
+      }
+    } else {
+      exportToHTML(path, true);
     }
-  } else {
-    exportToHTML(path, true);
+    app.toast.info("HTML docs exported successfully.");
+  } catch (err) {
+    console.error("Failed to export HTML docs:", err);
+    app.toast.error("Failed to export HTML docs.");
   }
 }
 
